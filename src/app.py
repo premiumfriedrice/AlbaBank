@@ -3,7 +3,7 @@ from tkinter import *
 from tkinter import messagebox
 from src import db
 import mysql.connector
-import random
+import regex
 import yaml
 with open("env.yaml", "r") as f:
     config = yaml.safe_load(f)
@@ -25,24 +25,26 @@ class SignUpWindow(ctk.CTkToplevel):
         
         self.TitleLabel = ctk.CTkLabel(self, justify=ctk.LEFT, text="Sign Up", font=("IBMPlexSerif", 20), text_color="white").grid(row=0, column=0, pady=10, padx=10)
         self.emailEntry = ctk.CTkEntry(self, placeholder_text="Email")
-        self.emailEntry.grid(row=1, column=0, pady=10, padx=10)
         self.birthdayEntry = ctk.CTkEntry(self, placeholder_text="YYYY-MM-DD")
-        self.birthdayEntry.grid(row=2, column=0, pady=10, padx=10)
         self.userEntry = ctk.CTkEntry(self, placeholder_text="Username")
-        self.userEntry.grid(row=3, column=0, pady=10, padx=10)
         self.newPasswordEntry = ctk.CTkEntry(self, placeholder_text="Password", show="*")
-        self.newPasswordEntry.grid(row=4, column=0, pady=10, padx=10)
         self.confirmPasswordEntry = ctk.CTkEntry(self, placeholder_text="Confirm Password", show="*")
-        self.confirmPasswordEntry.grid(row=5, column=0, pady=10, padx=10)
         self.confirmSignUp = ctk.CTkButton(self, text="Sign Up", command=self.signUp)
+    
+        self.emailEntry.grid(row=1, column=0, pady=10, padx=10)
+        self.birthdayEntry.grid(row=2, column=0, pady=10, padx=10)
+        self.userEntry.grid(row=3, column=0, pady=10, padx=10)
+        self.newPasswordEntry.grid(row=4, column=0, pady=10, padx=10)
+        self.confirmPasswordEntry.grid(row=5, column=0, pady=10, padx=10)
         self.confirmSignUp.grid(row=6, column=0, pady=10, padx=10)
         
     def signUp(self):
         if self.newPasswordEntry.get() == self.confirmPasswordEntry.get():
-            db.addUser(0, self.userEntry.get(), self.newPasswordEntry.get(), self.birthdayEntry, self.emailEntry.get(), 0, 0)
+            db.addUser(0, str(self.userEntry.get()), str(self.newPasswordEntry.get()), str(self.birthdayEntry.get()), str(self.emailEntry.get()), 0, 0)
             self.destroy()
         else:
             messagebox.showwarning(title="Error", message="Please confirm your new password.")
+    
         
 class MainMenu(ctk.CTkTabview):
     def __init__(self, master, **kwargs):
@@ -59,7 +61,6 @@ class MainMenu(ctk.CTkTabview):
         self.add("Balance")
         self.add("Pay and Transfer")
         self.add("Account")
-        
         
         self.checkingBalanceFrame = ctk.CTkFrame(self.tab("Balance"))
         self.checkingBalanceFrame.pack(side=ctk.LEFT, padx=10, pady=10, ipadx=10, ipady=10, fill="both", expand=True)
@@ -92,7 +93,7 @@ class MainMenu(ctk.CTkTabview):
         self.toLabel = ctk.CTkLabel(self.transferFrame, text="To:")
         self.toAccountChoice = ctk.CTkOptionMenu(self.transferFrame, values=["Checking", "Savings"])
         self.amountLabel = ctk.CTkLabel(self.transferFrame, text="Amount:")
-        self.amountEntry = ctk.CTkEntry(self.transferFrame, placeholder_text="0.00", width=200, height=40).grid(column=1, row=2, padx=60, pady=20)
+        self.amountEntry = ctk.CTkEntry(self.transferFrame, placeholder_text="0.00", width=200, height=40).grid(column=1, row=2, padx=60, pady=20) 
         self.fromLabel.grid(column=0, row=0, padx=20, pady=20)
         self.fromAccountChoice.grid(column=1, row=0, padx=20, pady=20)
         self.toLabel.grid(column=0, row=1, padx=20, pady=20)
@@ -113,14 +114,15 @@ class App(ctk.CTk):
         self.loginFrame = ctk.CTkFrame(self)
         self.loginFrame.pack(pady=20, padx=60, fill="both", expand=True)
         self.titleLabel = ctk.CTkLabel(self.loginFrame, justify=ctk.LEFT, text="Alba Bank", font=("IBMPlexSerif", 20), text_color="white")
-        self.titleLabel.pack(pady=30, padx=50)
         self.usernameEntry = ctk.CTkEntry(self.loginFrame, placeholder_text="Username")
-        self.usernameEntry.pack(pady=10, padx=10)
         self.passwordEntry = ctk.CTkEntry(self.loginFrame, placeholder_text="Password", show="*")
-        self.passwordEntry.pack(pady=10, padx=10)
         self.login_button = ctk.CTkButton(self.loginFrame, text="Login", command=self.login)
-        self.login_button.pack(pady=10, padx=10)
         self.signup_button = ctk.CTkButton(self.loginFrame, command=self.open_signUp, text="Sign Up")
+        
+        self.titleLabel.pack(pady=30, padx=50)
+        self.usernameEntry.pack(pady=10, padx=10)
+        self.passwordEntry.pack(pady=10, padx=10)
+        self.login_button.pack(pady=10, padx=10)
         self.signup_button.pack(pady=0, padx=10)
     
     global id
@@ -131,7 +133,7 @@ class App(ctk.CTk):
         cur.execute(valsql, (self.usernameEntry.get(), self.passwordEntry.get()))
         if cur.fetchall():
             for num in cur.fetchall():
-                id = num
+                id += num
                 print(id)
             self.openMainMenu()
         else:
