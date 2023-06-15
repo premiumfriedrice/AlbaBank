@@ -43,6 +43,13 @@ def addUser(id:int, username:str, password:str, birthdate:str, email:str, checki
     #return dbpassword     
     
 
+def getId(u, p):
+    sql = f"SELECT id FROM users WHERE username = {u}, password = {p}"
+    cur.execute(sql)
+    i = int(cur.fetchone()[0])
+    print(i)
+    return i
+
 def getChecking(id):
     sql = f"SELECT checking FROM users WHERE id = {id}"
     cur.execute(sql)

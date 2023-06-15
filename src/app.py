@@ -5,6 +5,8 @@ from src import db
 import mysql.connector
 import regex
 import yaml
+import hashlib
+import re
 with open("env.yaml", "r") as f:
     config = yaml.safe_load(f)
 
@@ -38,6 +40,8 @@ class SignUpWindow(ctk.CTkToplevel):
         self.confirmPasswordEntry.grid(row=5, column=0, pady=10, padx=10)
         self.confirmSignUp.grid(row=6, column=0, pady=10, padx=10)
         
+    pat = re.compile("[A-Z]+")
+        
     def signUp(self):
         if self.newPasswordEntry.get() == self.confirmPasswordEntry.get():
             db.addUser(0, str(self.userEntry.get()), str(self.newPasswordEntry.get()), str(self.birthdayEntry.get()), str(self.emailEntry.get()), 0, 0)
@@ -45,6 +49,7 @@ class SignUpWindow(ctk.CTkToplevel):
         else:
             messagebox.showwarning(title="Error", message="Please confirm your new password.")
     
+    #str(hashlib.sha256(self.newPasswordEntry.get().encode()).hexdigest())
         
 class MainMenu(ctk.CTkTabview):
     def __init__(self, master, **kwargs):
@@ -52,9 +57,7 @@ class MainMenu(ctk.CTkTabview):
         
         self.configure(segmented_button_selected_color="#5B9A8E", segmented_button_selected_hover_color="#37675E")        
         
-        global id
-        
-        self.userid = ctk.IntVar(value=1)
+        self.userid = ctk.IntVar(value=1)#App.rtrnId(self, )
         self.checkingAmount = ctk.DoubleVar(value=db.getChecking(self.userid.get()))
         self.savingsAmount = ctk.DoubleVar(value=db.getSavings(self.userid.get()))
         
@@ -127,18 +130,24 @@ class App(ctk.CTk):
     
     global id
     
+    def rtrnId(self, a):
+        id = a #store the id in a global variable maybe?
+        return id
+    
     def login(self):
         global id
         valsql = f"SELECT id FROM users WHERE username = %s AND password = %s"
         cur.execute(valsql, (self.usernameEntry.get(), self.passwordEntry.get()))
-        if cur.fetchall():
-            for num in cur.fetchall():
-                id += num
-                print(id)
+        s = cur.fetchall()
+        i = s[0][0]
+        print(self.rtrnId(i))
+        
+        if s:
             self.openMainMenu()
         else:
             messagebox.showwarning(title="Error", message="Invalid username or password.")
-
+        
+        
     def open_signUp(self):
         signUpwindow = SignUpWindow(self)
         signUpwindow.grab_set()
