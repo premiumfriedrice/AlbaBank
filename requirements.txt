@@ -1,6 +1,6 @@
-customtkinter == 5.1.3
-regex == 2023.6.3
-pyYAML == 6.0
-quandl == 3.7.0
-pandas == 2.0.2
-mysql.connector == 2.2.9
+customtkinter
+regex
+pyYAML
+quandl
+pandas
+mysql.connector
